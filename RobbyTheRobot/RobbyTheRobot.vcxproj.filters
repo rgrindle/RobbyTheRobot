@@ -15,27 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EnvironementCreator.cpp">
+    <ClCompile Include="..\src\RobotRuler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="..\src\EnvironementCreator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RobotCreator.cpp">
+    <ClCompile Include="..\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RobotRuler.cpp">
+    <ClCompile Include="..\src\RobotCreator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EnvironementCreator.hpp">
+    <ClInclude Include="..\include\EnvironementCreator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RobotCreator.hpp">
+    <ClInclude Include="..\include\RobotCreator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RobotRuler.hpp">
+    <ClInclude Include="..\include\RobotRuler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

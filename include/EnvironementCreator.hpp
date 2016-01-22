@@ -44,6 +44,9 @@ public:
 	int getOriginalState(std::vector<int> position);
 	int get4Neighborhood(int x, int y);
 	int get4Neighborhood(std::vector<int> position);
+	int get4Neighborhood(int x, int y, std::vector<std::vector<int> > env);	// this method is used for parallel processing
+	int get4Neighborhood(std::vector<int> position, std::vector<std::vector<int> > env);	// this method is used for parallel processing
+	std::vector<std::vector<int> > getOriginalEnvironement();
 
 	void setState(int x, int y, int state);
 	void setState(std::vector<int> position, int state);
@@ -57,10 +60,10 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& stream, EnvironementCreator& ec);
 private:
-	int width = 0;
-	int height = 0;
-	std::vector<std::vector<int> > environement;
-	std::vector<std::vector<int> > originalEnvironement;
+	int width__ = 0;
+	int height__ = 0;
+	std::vector<std::vector<int> > environement__;
+	std::vector<std::vector<int> > originalEnvironement__;
 };
 
 #endif // ENVIRONEMENTCREATOR_HPP_INCLUDED

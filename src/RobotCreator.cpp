@@ -62,31 +62,31 @@ const int& Robot::getYPosition()
 	return this->pos__[1];
 }
 
-std::string Robot::getDateString()
-{
-	time_t now;
-	char date[12];
+//std::string Robot::getDateString()
+//{
+//	time_t now;
+//	char date[12];
+//
+//	date[0] = '\0';
+//
+//	now = time(NULL);
+//
+//	if(now != -1)	{
+//		strftime(date,12,"%d_%m_%Y",gmtime(&now));
+//	}
+//
+//	return std::string(date);
+//}
 
-	date[0] = '\0';
-
-	now = time(NULL);
-
-	if(now != -1)	{
-		strftime(date,12,"%d_%m_%Y",gmtime(&now));
-	}
-
-	return std::string(date);
-}
-
-std::string Robot::getTimeString()
-{
-	char name[20];
-	time_t now = time(0);
-
-	strftime(name,sizeof(name),"%Y-%m-%d_%H-%M-%S",localtime(&now));
-
-	return std::string(name);
-}
+//std::string Robot::getTimeString()
+//{
+//	char name[20];
+//	time_t now = time(0);
+//
+//	strftime(name,sizeof(name),"%Y-%m-%d_%H-%M-%S",localtime(&now));
+//
+//	return std::string(name);
+//}
 
 //=============================================================================
 //	Set Functions
@@ -137,14 +137,13 @@ void Robot::setAlgorithm(std::vector<int> algrthm)
 {
 	this->algorithm__ = algrthm;
 }
-
 void Robot::saveAlgorithm()
 {
 	std::ofstream out;
 	std::string filename = "./data/algorithm/algorithm";
 
 	//filename.append(this->getDateString());
-	filename.append(this->getTimeString());
+	//filename.append(this->getTimeString());
 	filename.append(".txt");
 	out.open(filename.c_str(), std::ofstream::out);
 

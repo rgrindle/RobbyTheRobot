@@ -5,12 +5,14 @@
 #include "RobotCreator.hpp"
 #include <vector>
 #include <algorithm>
+#include <chrono>
+#include <thread>
 
-#define CAN			1
+#define CAN				1
 #define NO_CAN			0
 
 #define WALL			1
-#define NO_WALL		0
+#define NO_WALL			0
 
 #define MOVE_FORWARD	0
 #define MOVE_BACKWARD	1
@@ -19,9 +21,9 @@
 #define MOVE_RANDOM		4
 #define REMOVE_CAN		5
 
-#define CAN_COLLECTED 10
-#define CAN_NOT_COLLECTED -1
-#define WALL_HIT -5
+#define CAN_COLLECTED		10
+#define CAN_NOT_COLLECTED	-1
+#define WALL_HIT			-5
 
 class pairer
 {
@@ -29,6 +31,7 @@ public:
 	int firstIndex;
 	int secondIndex;
 	double percent;
+	unsigned int numberOfBabies;
 };
 
 bool compScore(Robot r1, Robot r2);
@@ -38,10 +41,14 @@ class RobotRuler: public EnvironementCreator
 {
 public:
 	RobotRuler(int population, int h, int w);
+	RobotRuler(int population, int h, int w, std::string algorithmFileLocation, std::string scoreDataName);
 	~RobotRuler();
 
 	void performCommand(std::vector<Robot>::iterator robotIterator, int cmd);
+	void performCommand(std::vector<Robot>::iterator robotIterator, int cmd, std::vector<std::vector<int> > env); // parallel processing version
 	void simulateGeneration(int moves, int seasons);
+	void singleThreadedGenerations(int seasons);
+	void multiThreadedGenerations(std::vector<std::vector<int> > env, int moves, int seasons, int numOfCores, int coreNum);  // parallel processing version
 	void rankRobots();
 	void mate();
 
@@ -64,6 +71,7 @@ public:
 	const int& getMin();
 	const int& getAverage();
 	std::string getTimeString();
+	double getMedianScore();
 
 	void setPosition(int robotIndex, int x, int y);
 	void setPosition(int robotIndex, std::vector<int> position);
@@ -83,12 +91,19 @@ public:
 	void saveAlgorithm(int robotIndex);
 	void saveAlgorithm(std::vector<Robot>::iterator robotIterator);
 
+	void printScore();
+
+	std::ofstream scoreOut;
+	std::ofstream algorithmOut;
+
 private:
 	std::vector<Robot> robby__;
 	int moves__;
 	double avg__;
 	int min__;
 	int max__;
+	double median__;
+	int generation__;
 };
 
 #endif // ROBOTRULER_HPP_INCLUDED

@@ -71,6 +71,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -93,6 +94,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -115,15 +117,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="EnvironementCreator.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="RobotCreator.cpp" />
-    <ClCompile Include="RobotRuler.cpp" />
+    <ClCompile Include="..\src\EnvironementCreator.cpp" />
+    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\RobotCreator.cpp" />
+    <ClCompile Include="..\src\RobotRuler.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EnvironementCreator.hpp" />
-    <ClInclude Include="RobotCreator.hpp" />
-    <ClInclude Include="RobotRuler.hpp" />
+    <ClInclude Include="..\include\EnvironementCreator.hpp" />
+    <ClInclude Include="..\include\RobotCreator.hpp" />
+    <ClInclude Include="..\include\RobotRuler.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

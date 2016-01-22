@@ -1,7 +1,5 @@
 #include "RobotRuler.hpp"
 
-std::fstream out("data.txt");
-
 //=============================================================================
 //	Constructor / Destructor
 //=============================================================================
@@ -9,6 +7,12 @@ std::fstream out("data.txt");
 RobotRuler::RobotRuler(int population, int h, int w)
 	:EnvironementCreator(h,w)
 {
+	scoreOut.open("../data/score/score_data2.csv");
+
+	scoreOut << "Generation," << "Minimum," << "Average," << "Median," << "Maximum,";
+
+	//algorithmOut.open("./data/algorithm/algorithm_data.csv", std::ofstream::out);
+
 	this->setState(1,0.5);
 	robby__.resize(population,Robot(w,h));
 
@@ -16,11 +20,77 @@ RobotRuler::RobotRuler(int population, int h, int w)
 	for(it = robby__.begin(); it != robby__.end(); ++it)	{
 		it->setAlgorithm(this->generateAlgorithm(6,511));	// not all the numbers will correspond to situations that will actually happen
 	}
+
+	this->generation__ = 0;
+}
+
+RobotRuler::RobotRuler(int population, int h, int w, std::string algorithmFileLocation, std::string scoreDataName)
+	:EnvironementCreator(h, w)
+{
+	// get generation number
+	std::ifstream scoreIn("data/score/" + scoreDataName + ".csv");
+
+	if (scoreIn.is_open()) {
+		scoreIn.seekg(-1, std::ios_base::end);                // go to one spot before the EOF
+
+		bool keepLooping = true;
+
+		while (keepLooping) {
+			char ch;
+			scoreIn.get(ch);                            // Get current byte's data
+
+			if ((int)scoreIn.tellg() <= 1) {             // If the data was at or before the 0th byte
+				scoreIn.seekg(0);                       // The first line is the last line
+				keepLooping = false;                // So stop there
+			}
+			else if (ch == '\n') {                   // If the data was a newline
+				keepLooping = false;                // Stop at the current position.
+			}
+			else {                                  // If the data was neither a newline nor at the 0 byte
+				scoreIn.seekg(-2, std::ios_base::cur);        // Move to the front of that data, then to the front of the data before it
+			}
+		}
+	}
+
+	std::string lastLine;
+	std::getline(scoreIn, lastLine);                      // Read the current line
+	std::cout << "Result: " << lastLine << '\n';     // Display it
+	std::string generator = lastLine.substr(0, lastLine.find(','));
+	std::cout << "Generator: " << generator << std::endl;
+	int gen = stoi(generator);
+	std::cout << "Generator: " << gen << std::endl;
+	this->generation__ = gen+1;
+	scoreIn.close();
+	
+	scoreOut.open("data/score/"+scoreDataName+".csv", std::ofstream::app);
+
+	this->setState(1, 0.5);
+	robby__.resize(population, Robot(w, h));
+
+	// set up algorithms
+	std::ifstream algorithmIn(algorithmFileLocation + "/generation" + generator + ".csv", std::ofstream::out);
+
+	std::vector<int> algorithm(512);
+	std::vector<int>::iterator alIt;
+
+	std::vector<Robot>::iterator it;
+	for (it = robby__.begin(); it != robby__.end(); ++it) {
+		std::string currentAlgorithm;
+		getline(algorithmIn, currentAlgorithm);
+
+		for (alIt = algorithm.begin(); alIt < algorithm.end() && !currentAlgorithm.empty(); ++alIt) {
+			int comma = currentAlgorithm.find(',');
+			*alIt = stoi(currentAlgorithm.substr(0, comma));
+			currentAlgorithm.erase(0, comma+1);
+		}
+		it->setAlgorithm(algorithm);
+	}
 }
 
 RobotRuler::~RobotRuler()
 {
-
+	scoreOut.close();
+	algorithmOut.close();
 }
 
 //=============================================================================
@@ -107,15 +177,15 @@ const int& RobotRuler::getAverage()
 	return this->avg__;
 }
 
-std::string RobotRuler::getTimeString()
-{
-	char name[20];
-	time_t now = time(0);
-
-	strftime(name,sizeof(name),"%Y-%m-%d_%H-%M-%S",localtime(&now));
-
-	return std::string(name);
-}
+//std::string RobotRuler::getTimeString()
+//{
+//	char name[20];
+//	time_t now = time(0);
+//
+//	strftime(name,sizeof(name),"%Y-%m-%d_%H-%M-%S",localtime(&now));
+//
+//	return std::string(name);
+//}
 
 //=============================================================================
 //	Set Functions
@@ -203,30 +273,30 @@ void RobotRuler::saveAlgorithm(std::vector<Robot>::iterator robotIterator)
 void RobotRuler::saveAlgorithmList()
 {
 	std::vector<Robot>::iterator robotIterator;
-	std::ofstream out;
-	std::string filename = "./data/algorithm/algorithmList";
+	//std::ofstream out;
 
-	//filename.append(this->getDateString());
-	filename.append(this->getTimeString());
-	filename.append(".txt");
-	out.open(filename.c_str(), std::ofstream::out);
+	std::ostringstream generationNumberString;
+	generationNumberString << this->generation__;
 
-	if(out.is_open())	{
+	algorithmOut.open("../data/algorithm/generation" + generationNumberString.str() + ".csv", std::ofstream::out);
+
+//	if (algorithmOut.is_open())	{
 		for(robotIterator = robby__.begin(); robotIterator != robby__.end(); ++robotIterator)	{
 			std::vector<int> al = robotIterator->getAlgorithm();
-			std::vector<int>::iterator it;
-			out << std::distance(robby__.begin(),robotIterator) << ".";
-			for(it = al.begin(); it != al.end(); ++it)	{
-				out << *it;
-			}
-			out << std::endl << std::endl;
 
+			std::vector<int>::iterator it;
+			//algorithmOut << std::distance(robby__.begin(), robotIterator) << ".";
+
+			for(it = al.begin(); it != al.end(); ++it)	{
+				algorithmOut << *it << ',';
+			}
+			algorithmOut << std::endl;
 		}
-		out.close();
-	}
-	else {
+		algorithmOut.close();
+//	}
+//	else {
 		// throw exception
-	}
+//	}
 }
 
 void RobotRuler::performCommand(std::vector<Robot>::iterator robotIterator, int cmd)
@@ -319,23 +389,171 @@ void RobotRuler::performCommand(std::vector<Robot>::iterator robotIterator, int 
 	}
 }
 
+void RobotRuler::performCommand(std::vector<Robot>::iterator robotIterator, int cmd, std::vector<std::vector<int> > env)
+{
+	int movement;
+
+	switch (cmd)
+	{
+	case MOVE_FORWARD:
+		if (robotIterator->get4Neighborhood() & FRONT_WALL_BIT)	{
+			robotIterator->changeScore(WALL_HIT);
+		}
+		else {
+			robotIterator->setYPosition(robotIterator->getYPosition() - 1);
+		}
+		break;
+	case MOVE_BACKWARD:
+		if (robotIterator->get4Neighborhood() & BACK_WALL_BIT)	{
+			robotIterator->changeScore(WALL_HIT);
+		}
+		else {
+			robotIterator->setYPosition(robotIterator->getYPosition() + 1);
+		}
+		break;
+	case MOVE_LEFT:
+		if (robotIterator->get4Neighborhood() & LEFT_WALL_BIT)	{
+			robotIterator->changeScore(WALL_HIT);
+		}
+		else {
+			robotIterator->setXPosition(robotIterator->getXPosition() - 1);
+		}
+		break;
+	case MOVE_RIGHT:
+		if (robotIterator->get4Neighborhood() & RIGHT_WALL_BIT)	{
+			robotIterator->changeScore(WALL_HIT);
+		}
+		else {
+			robotIterator->setXPosition(robotIterator->getXPosition() + 1);
+		}
+		break;
+	case MOVE_RANDOM:
+		movement = rand() % 4;
+
+		switch (movement)
+		{
+		case MOVE_FORWARD:
+			if (robotIterator->get4Neighborhood() & FRONT_WALL_BIT)	{
+				robotIterator->changeScore(WALL_HIT);
+			}
+			else {
+				robotIterator->setYPosition(robotIterator->getYPosition() - 1);
+			}
+			break;
+		case MOVE_BACKWARD:
+			if (robotIterator->get4Neighborhood() & BACK_WALL_BIT)	{
+				robotIterator->changeScore(WALL_HIT);
+			}
+			else {
+				robotIterator->setYPosition(robotIterator->getYPosition() + 1);
+			}
+			break;
+		case MOVE_LEFT:
+			if (robotIterator->get4Neighborhood() & LEFT_WALL_BIT)	{
+				robotIterator->changeScore(WALL_HIT);
+			}
+			else {
+				robotIterator->setXPosition(robotIterator->getXPosition() - 1);
+			}
+			break;
+		case MOVE_RIGHT:
+			if (robotIterator->get4Neighborhood() & RIGHT_WALL_BIT)	{
+				robotIterator->changeScore(WALL_HIT);
+			}
+			else {
+				robotIterator->setXPosition(robotIterator->getXPosition() + 1);
+			}
+			break;
+		}
+		break;
+	case REMOVE_CAN:
+		if (env[robotIterator->getXPosition()][robotIterator->getYPosition()] == CAN)	{
+			robotIterator->increaseCansCollected();
+			env[robotIterator->getXPosition()][robotIterator->getYPosition()] = NO_CAN;
+			robotIterator->changeScore(CAN_COLLECTED);
+		}
+		else {
+			robotIterator->changeScore(CAN_NOT_COLLECTED);
+		}
+		break;
+	}
+}
+
 void RobotRuler::simulateGeneration(int moves, int seasons)
 {
 	this->setMoves(moves);
-	std::vector<Robot>::iterator it;
-	int i;
 
-	for(it = robby__.begin(); it != robby__.end(); ++it)	{
+	auto start = std::chrono::system_clock::now();
+#if 0	// to thread or not to thread... (more accurately is threading really helping?)
+	unsigned int cores = std::thread::hardware_concurrency();
+
+	std::cout << cores << " cores" << std::endl;
+
+	if (cores <= 1)	{
+		singleThreadedGenerations(seasons);
+	}
+	else {
+		std::vector<std::thread> threads;
+		int i;
+		std::vector<std::vector<int> > env = EnvironementCreator::getOriginalEnvironement();
+
+
+		// each thread will do every coreth robot
+		for (i = 0; i < cores; ++i)	{
+			threads.push_back(std::thread(&RobotRuler::multiThreadedGenerations, this, env, moves, seasons, cores, i));
+		}
+		// join all threads
+		for (std::vector<std::thread>::iterator it = threads.begin(); it < threads.end(); ++it)	{
+			it->join();
+		}
+	}
+#else
+	singleThreadedGenerations(seasons);
+#endif
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start);
+	std::cout << duration.count() << " ms" << '\t';
+}
+
+void RobotRuler::multiThreadedGenerations(std::vector<std::vector<int> > env, int moves, int seasons, int numOfCores, int coreNum)
+{
+	std::vector<std::vector<int> > envCurrent = env;
+
+	for (std::vector<Robot>::iterator it = robby__.begin() + coreNum; it < robby__.end(); it += numOfCores)	{
+		int sum = 0;
+		// run through every season
+		for (int i = 0; i < seasons; ++i)	{
+			// run through every move within each season
+			for (int j = 0; j < moves; ++j)	{
+				std::vector<int> al = it->getAlgorithm();
+				int n = EnvironementCreator::get4Neighborhood(it->getPosition(),envCurrent);
+//				int n = 10;
+				it->set4Neighborhood(n);
+				this->performCommand(it, al[n], envCurrent);
+			}
+			envCurrent = env; // restore environement
+			it->setPosition(rand() % env.size(), rand() % env[0].size()); // set random start postion
+			sum += it->getScore();	// keep a running sum to be average at the end
+			// reset score
+			it->setScore(0);
+			it->setCansCollected(0);
+		}
+		//std::cout << it - robby__.begin() << std::endl; //RGG 12/31
+		// average the final results and set as individual score
+		it->setScore((double)sum / (double)seasons);
+	}
+}
+
+void RobotRuler::singleThreadedGenerations(int seasons)
+{
+	for (std::vector<Robot>::iterator it = robby__.begin(); it != robby__.end(); ++it)	{
 		int sum = 0;
 
-		for(i = 0; i < seasons; ++i)	{
-			int j;
-
-			for(j = 0; j < moves; ++j)	{
+		for (int i = 0; i < seasons; ++i)	{
+			for (int j = 0; j < this->getMoves(); ++j)	{
 				std::vector<int> al = it->getAlgorithm();
 				int n = EnvironementCreator::get4Neighborhood(it->getPosition());
 				it->set4Neighborhood(n);
-				this->performCommand(it,al[n]);
+				this->performCommand(it, al[n]);
 			}
 			EnvironementCreator::restoreEnvironement();
 			it->setPosition(rand() % EnvironementCreator::getWidth(), rand() % EnvironementCreator::getHeight());
@@ -343,24 +561,31 @@ void RobotRuler::simulateGeneration(int moves, int seasons)
 			it->setScore(0);
 			it->setCansCollected(0);
 		}
-		it->setScore((double)sum/(double)seasons);
+		it->setScore((double)sum / (double)seasons);
 	}
 }
 
 void RobotRuler::rankRobots()
 {
+	//std::fstream out("data.txt");
+
 	std::vector<Robot>::iterator it;
 	int m = this->getMoves();
+
+	// init min and max opposite 
 	int minimum = CAN_COLLECTED*m;
 	int maximum = std::min(WALL_HIT*m,CAN_NOT_COLLECTED*m);
+
 	int sum = 0;
 	int counter = 0;
 	int score;
 
+	// organize robots from max to min score
 	std::sort(robby__.begin(),robby__.end(),compScore);
 
 	for(it = robby__.begin(); it != robby__.end(); ++it, ++counter)	{
 		score = it->getScore();
+		//std::cout << score << std::endl;
 		//std::cout << score << ' ';
 		if(score > maximum)	{
 			maximum = score;
@@ -373,10 +598,21 @@ void RobotRuler::rankRobots()
 	this->avg__ = (double) sum/counter;
 	this->min__ = minimum;
 	this->max__ = maximum;
+	this->median__ = getMedianScore();
+}
 
-	out << this->min__ << ',';
-	out << this->avg__ << ',';
-	out << this->max__ << ',' << std::endl;
+void RobotRuler::printScore()
+{
+	std::cout << " for Generation " << this->generation__ << '\t' << this->min__ << '\t' << this->avg__ << '\t' << this->median__ << '\t' << this->max__ << std::endl;
+
+	scoreOut << std::endl;
+	scoreOut << this->generation__ << ',';
+	scoreOut << this->min__ << ',';
+	scoreOut << this->avg__ << ',';
+	scoreOut << this->median__ << ',';
+	scoreOut << this->max__ << ',';
+
+	++generation__;
 }
 
 bool compScore(Robot r1, Robot r2)
@@ -389,26 +625,58 @@ bool compPercent(pairer p1, pairer p2)
 	return (p1.percent > p2.percent);
 }
 
+double RobotRuler::getMedianScore()
+{
+	double median;
+	int size = this->robby__.size();
+	// assuming that data is already sorted
+
+	if (size % 2 == 0)
+	{
+		median = (this->robby__[size/2-1].getScore() + this->robby__[size / 2].getScore()) / 2;
+	}
+	else
+	{
+		median = this->robby__[(int)size / 2].getScore();
+	}
+
+	return median;
+}
+
 void RobotRuler::mate()
 {
 	std::vector<pairer> pairs;
-	pairs.resize(this->robby__.size());
-	std::vector<pairer>::iterator pairIt;
+	int start;
+	int sum;
+	int numberOfMates = 10;
 
-	for(pairIt = pairs.begin(); pairIt != pairs.end(); ++pairIt)	{
-		(*pairIt).firstIndex = rand() % this->robby__.size();
-		(*pairIt).secondIndex = rand() % this->robby__.size();
+	for (start = 0, sum = 0; sum < this->robby__.size(); ++start) {
+		
+		int j, babies;
+		for (j = 0, babies = 16; j < numberOfMates; ++j) {
+			pairs.push_back(pairer());
+			pairs.back().firstIndex = start;
+			pairs.back().secondIndex = start + j + 1;
+			pairs.back().numberOfBabies = babies;
+			//std::cout << (*pairIt).firstIndex << ' ' << (*pairIt).secondIndex << std::endl;
+			// -1000, 500 -> range = 1500 -> % = (score+1000)/1500 for each robot -> pair % = {(score+1000)/1500}^2, scores may actually be differnt
+			// make all relavtive scores positive to avoid weird results
+	//		(*pairIt).percent = (double)((this->robby__[(*pairIt).firstIndex].getScore()+1000.0)*(this->robby__[(*pairIt).secondIndex].getScore()+1000.0))/2250000.0;
+			//std::cout << (*pairIt).percent << std::endl;
+			sum += babies;
 
-		while((*pairIt).firstIndex == (*pairIt).secondIndex)	{
-			(*pairIt).secondIndex = rand() % this->robby__.size();
+			if (babies != 2) {
+				babies /= 2;
+			}
 		}
-		//std::cout << (*pairIt).firstIndex << ' ' << (*pairIt).secondIndex << std::endl;
-		// -1000 500 -> range = 1500 -> % = (score+1000)/1500
-		(*pairIt).percent = (double)((this->robby__[(*pairIt).firstIndex].getScore()+1000.0d)*(this->robby__[(*pairIt).secondIndex].getScore()+1000.0d))/2250000.0d;
-		//std::cout << (*pairIt).percent << std::endl;
+
+		if (numberOfMates != 1) {
+			--numberOfMates;
+		}
 	}
 
-	std::sort(pairs.begin(),pairs.end(),compPercent);
+	// order in decending order by percentage of pair
+	//std::sort(pairs.begin(),pairs.end(),compPercent);
 
 //	std::vector<pairer>::iterator ilk;
 
@@ -416,43 +684,43 @@ void RobotRuler::mate()
 //		std::cout << (*ilk).percent << ' ';
 //	}
 
-	std::vector<Robot> tmp;
-	tmp.resize(this->robby__.size(),Robot());
+	std::vector<Robot> tmp(this->robby__.size(),Robot());
 	std::vector<Robot>::iterator tmpIt;
 //	std::vector<int>::iterator algIt;
-	std::vector<int> newAlg;
-	newAlg.resize(this->robby__[0].getAlgorithm().size());
+	std::vector<int> newAlg(this->robby__[0].getAlgorithm().size());
 	std::vector<int> alg1;
 	std::vector<int> alg2;
 	int choose;
-	int counter;
 	int babies;
+	//int counter;
+	//int babies;
+	std::vector<pairer>::iterator pairIt;
 
-	for(counter = 0, tmpIt = tmp.begin(), pairIt = pairs.begin(); tmpIt != tmp.end(); ++tmpIt, ++pairIt, ++counter)	{
-		if(counter < 20)	{
-			babies = 4;
-		}
-		else	{
-			babies = 2;
-		}
+	for(pairIt = pairs.begin(); pairIt < pairs.end(); ++pairIt)	{
+	//	if(counter < 20)	{
+	//		babies = 4;
+	//	}
+	//	else	{
+	//		babies = 2;
+	//	}
 
-		for( ; babies > 0; --babies)	{
-			alg1 = this->robby__[(*pairIt).firstIndex].getAlgorithm();
-			alg2 = this->robby__[(*pairIt).secondIndex].getAlgorithm();
+		for (tmpIt = tmp.begin(), babies = pairIt->numberOfBabies; babies > 0, tmpIt < tmp.end(); --babies, ++tmpIt) {
+			alg1 = this->robby__[pairIt->firstIndex].getAlgorithm();
+			alg2 = this->robby__[pairIt->secondIndex].getAlgorithm();
 			int i;
 
 			for(i = 0; i < newAlg.size(); ++i)	{
-				choose = rand() % 100 + 1;
+				choose = rand() % 100 + 1;	// random number between 1 and 100
 
 				// mutate at rate of 2%
-				if(choose > 51)	{
+				if(choose > 50)	{
 					newAlg[i] = alg1[i];	// mom's gene
 				}
 				else if(choose > 2)	{
 					newAlg[i] = alg2[i];	// dad's gene
 				}
 				else	{
-					newAlg[i] = rand() % 6;	// mutated gene
+					newAlg[i] = rand() % 6;	// mutated gene is random
 				}
 			}
 			tmpIt->setAlgorithm(newAlg);

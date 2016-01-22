@@ -20,13 +20,13 @@ EnvironementCreator::EnvironementCreator(int h, int w)
 	srand(time(NULL));
 
 	this->setDimensions(h,w);
-	this->originalEnvironement.resize(w);
-	this->environement.resize(w);
+	this->originalEnvironement__.resize(w);
+	this->environement__.resize(w);
 
 	int i;
 	for(i = 0; i < w; ++i)	{
-		this->environement[i].resize(h);
-		this->originalEnvironement[i].resize(h);
+		this->environement__[i].resize(h);
+		this->originalEnvironement__[i].resize(h);
 	}
 }
 
@@ -41,17 +41,17 @@ EnvironementCreator::~EnvironementCreator()
 
 int EnvironementCreator::getWidth()
 {
-	return this->width;
+	return this->width__;
 }
 
 int EnvironementCreator::getHeight()
 {
-	return this->height;
+	return this->height__;
 }
 
 int EnvironementCreator::getState(int x, int y)
 {
-	return this->environement[x][y];
+	return this->environement__[x][y];
 }
 
 int EnvironementCreator::getState(std::vector<int> position)
@@ -61,7 +61,7 @@ int EnvironementCreator::getState(std::vector<int> position)
 
 int EnvironementCreator::getOriginalState(int x, int y)
 {
-	return this->originalEnvironement[x][y];
+	return this->originalEnvironement__[x][y];
 }
 
 int EnvironementCreator::getOriginalState(std::vector<int> position)
@@ -136,10 +136,77 @@ int EnvironementCreator::get4Neighborhood(int x, int y)
 	return neighborhood;
 }
 
+// this overloaded method doesn't tough the member environement__. This is useful for parallel processing
+int EnvironementCreator::get4Neighborhood(int x, int y, std::vector<std::vector<int> > env)
+{
+	int neighborhood = 0;
+
+	// check if at the top edge
+	if (y > 0)	{
+		if (env[x][y-1])	{
+			neighborhood |= FRONT_STATE_BIT;
+		}
+	}
+	else {
+		neighborhood |= FRONT_WALL_BIT;
+		neighborhood &= ~FRONT_STATE_BIT;
+	}
+	
+	// check if at the bottom edge
+	if (y < env[0].size() - 1)	{
+		if (env[x][y+1])	{
+			neighborhood |= BACK_STATE_BIT;
+		}
+	}
+	else {
+		neighborhood |= BACK_WALL_BIT;
+		neighborhood &= ~BACK_STATE_BIT;
+	}
+
+	// check if at the left edge
+	if (x > 0)	{
+		if (env[x-1][y])	{
+			neighborhood |= LEFT_STATE_BIT;
+		}
+	}
+	else {
+		neighborhood |= LEFT_WALL_BIT;
+		neighborhood &= ~LEFT_STATE_BIT;
+	}
+
+	// check if at the right edge
+	if (x < env.size() - 1)	{
+		if (env[x+1][y])	{
+			neighborhood |= RIGHT_STATE_BIT;
+		}
+	}
+	else {
+		neighborhood |= RIGHT_WALL_BIT;
+		neighborhood &= ~RIGHT_STATE_BIT;
+	}
+
+	// check current spot for state
+	if (env[x][y])	{
+		neighborhood |= CURRENT_STATE_BIT;
+	}
+
+	return neighborhood;
+}
+
+int EnvironementCreator::get4Neighborhood(std::vector<int> position, std::vector<std::vector<int> > env)
+{
+	return this->get4Neighborhood(position[0], position[1], env);
+}
+
 int EnvironementCreator::get4Neighborhood(std::vector<int> position)
 {
 	// check indices
 	return this->get4Neighborhood(position[0],position[1]);
+}
+
+std::vector<std::vector<int> > EnvironementCreator::getOriginalEnvironement()
+{
+	return this->originalEnvironement__;
 }
 
 //=============================================================================
@@ -148,7 +215,7 @@ int EnvironementCreator::get4Neighborhood(std::vector<int> position)
 
 void EnvironementCreator::setState(int x, int y, int state)
 {
-	this->environement[x][y] = state;
+	this->environement__[x][y] = state;
 }
 
 void EnvironementCreator::setState(std::vector<int> position, int state)
@@ -158,7 +225,7 @@ void EnvironementCreator::setState(std::vector<int> position, int state)
 
 void EnvironementCreator::setOriginalState(int x, int y, int state)
 {
-	this->originalEnvironement[x][y] = state;
+	this->originalEnvironement__[x][y] = state;
 }
 
 void EnvironementCreator::setOriginalState(std::vector<int> position, int state)
@@ -171,10 +238,10 @@ void EnvironementCreator::setState(int state, double probability)
 	int state1 = 0;
 	int state0 = 0;
 
-	std::vector<std::vector<int> >::iterator yIt = environement.begin();
+	std::vector<std::vector<int> >::iterator yIt = environement__.begin();
 	std::vector<int>::iterator xIt;
 
-	while(yIt != environement.end())	{
+	while(yIt != environement__.end())	{
 		xIt = yIt->begin();
 		while(xIt != yIt->end())	{
 			if(rand() % 101 < probability*100)	{
@@ -194,7 +261,7 @@ void EnvironementCreator::setState(int state, double probability)
 		++yIt;
 	}
 
-	this->originalEnvironement = this->environement;
+	this->originalEnvironement__ = this->environement__;
 	std::cout << "State0: " << state0 << std::endl;
 	std::cout << "State1: " << state1 << std::endl;
 	std::cout << "% of state 1 is " << (double) state1/(double)(state1+state0)*100.0 << '%' << std::endl;
@@ -202,8 +269,8 @@ void EnvironementCreator::setState(int state, double probability)
 
 void EnvironementCreator::setDimensions(int h, int w)
 {
-	width = w;
-	height = h;
+	width__ = w;
+	height__ = h;
 }
 
 //=============================================================================
@@ -235,7 +302,7 @@ std::vector<int> EnvironementCreator::generateAlgorithm(int commands, int situat
 	std::vector<int> algorithm;
 
 	algorithm.resize(situations);
-
+	int zero = 0, one = 0, two = 0, three = 0, four = 0, five = 0;
 	int i;
 	for(i = 0; i < algorithm.size(); ++i)	{
 		algorithm[i] = rand() % commands;
@@ -246,5 +313,5 @@ std::vector<int> EnvironementCreator::generateAlgorithm(int commands, int situat
 
 void EnvironementCreator::restoreEnvironement()
 {
-	this->environement = this->originalEnvironement;
+	this->environement__ = this->originalEnvironement__;
 }
