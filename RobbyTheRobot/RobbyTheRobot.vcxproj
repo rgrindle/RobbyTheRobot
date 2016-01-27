@@ -119,12 +119,13 @@
   <ItemGroup>
     <ClCompile Include="..\src\EnvironementCreator.cpp" />
     <ClCompile Include="..\src\main.cpp" />
-    <ClCompile Include="..\src\RobotCreator.cpp" />
+    <ClCompile Include="..\src\Robot.cpp" />
     <ClCompile Include="..\src\RobotRuler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\EnvironementCreator.hpp" />
-    <ClInclude Include="..\include\RobotCreator.hpp" />
+    <ClInclude Include="..\include\Pair.hpp" />
+    <ClInclude Include="..\include\Robot.hpp" />
     <ClInclude Include="..\include\RobotRuler.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

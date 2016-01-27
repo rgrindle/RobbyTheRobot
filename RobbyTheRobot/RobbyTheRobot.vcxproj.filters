@@ -24,7 +24,7 @@
     <ClCompile Include="..\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\RobotCreator.cpp">
+    <ClCompile Include="..\src\Robot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,10 +32,13 @@
     <ClInclude Include="..\include\EnvironementCreator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\RobotCreator.hpp">
+    <ClInclude Include="..\include\RobotRuler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\RobotRuler.hpp">
+    <ClInclude Include="..\include\Robot.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Pair.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

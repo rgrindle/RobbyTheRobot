@@ -7,7 +7,7 @@
 RobotRuler::RobotRuler(int population, int h, int w)
 	:EnvironementCreator(h,w)
 {
-	scoreOut.open("../data/score/score_data2.csv");
+	scoreOut.open("../data/score/score_data.csv");
 
 	scoreOut << "Generation," << "Minimum," << "Average," << "Median," << "Maximum,";
 
@@ -97,82 +97,82 @@ RobotRuler::~RobotRuler()
 //	Get Functions
 //=============================================================================
 
-const std::vector<int>& RobotRuler::getPosition(int robotIndex)
+std::vector<int> RobotRuler::getPosition(int robotIndex)
 {
 	return this->robby__[robotIndex].getPosition();
 }
 
-const int& RobotRuler::getXPosition(int robotIndex)
+int RobotRuler::getXPosition(int robotIndex)
 {
 	return this->robby__[robotIndex].getXPosition();
 }
 
-const int& RobotRuler::getYPosition(int robotIndex)
+int RobotRuler::getYPosition(int robotIndex)
 {
 	return this->robby__[robotIndex].getYPosition();
 }
 
-const std::vector<int>& RobotRuler::getAlgorithm(int robotIndex)
+std::vector<int> RobotRuler::getAlgorithm(int robotIndex)
 {
 	return this->robby__[robotIndex].getAlgorithm();
 }
 
-const int& RobotRuler::getScore(int robotIndex)
+int RobotRuler::getScore(int robotIndex)
 {
 	return this->robby__[robotIndex].getScore();
 }
 
-const int& RobotRuler::getCansCollected(int robotIndex)
+int RobotRuler::getCansCollected(int robotIndex)
 {
 	return this->robby__[robotIndex].getCansCollected();
 }
 
-const std::vector<int>& RobotRuler::getPosition(std::vector<Robot>::iterator robotIterator)
+std::vector<int> RobotRuler::getPosition(std::vector<Robot>::iterator robotIterator)
 {
 	return robotIterator->getPosition();
 }
 
-const int& RobotRuler::getXPosition(std::vector<Robot>::iterator robotIterator)
+int RobotRuler::getXPosition(std::vector<Robot>::iterator robotIterator)
 {
 	return robotIterator->getXPosition();
 }
 
-const int& RobotRuler::getYPosition(std::vector<Robot>::iterator robotIterator)
+int RobotRuler::getYPosition(std::vector<Robot>::iterator robotIterator)
 {
 	return robotIterator->getYPosition();
 }
 
-const std::vector<int>& RobotRuler::getAlgorithm(std::vector<Robot>::iterator robotIterator)
+std::vector<int> RobotRuler::getAlgorithm(std::vector<Robot>::iterator robotIterator)
 {
 	return robotIterator->getAlgorithm();
 }
 
-const int& RobotRuler::getScore(std::vector<Robot>::iterator robotIterator)
+int RobotRuler::getScore(std::vector<Robot>::iterator robotIterator)
 {
 	return robotIterator->getScore();
 }
 
-const int& RobotRuler::getCansCollected(std::vector<Robot>::iterator robotIterator)
+int RobotRuler::getCansCollected(std::vector<Robot>::iterator robotIterator)
 {
 	return robotIterator->getCansCollected();
 }
 
-const int& RobotRuler::getMoves()
+int RobotRuler::getMoves()
 {
 	return this->moves__;
 }
 
-const int& RobotRuler::getMax()
+int RobotRuler::getMax()
 {
 	return this->max__;
 }
 
-const int& RobotRuler::getMin()
+int RobotRuler::getMin()
 {
 	return this->min__;
 }
 
-const int& RobotRuler::getAverage()
+double RobotRuler::getAverage()
 {
 	return this->avg__;
 }
@@ -254,16 +254,6 @@ void RobotRuler::increaseCansCollected(std::vector<Robot>::iterator robotIterato
 void RobotRuler::setMoves(int moves)
 {
 	this->moves__ = moves;
-}
-
-void RobotRuler::saveAlgorithm(int robotIndex)
-{
-	this->robby__[robotIndex].saveAlgorithm();
-}
-
-void RobotRuler::saveAlgorithm(std::vector<Robot>::iterator robotIterator)
-{
-	robotIterator->saveAlgorithm();
 }
 
 //=============================================================================
@@ -620,11 +610,6 @@ bool compScore(Robot r1, Robot r2)
 	return (r1.getScore() > r2.getScore());
 }
 
-bool compPercent(pairer p1, pairer p2)
-{
-	return (p1.percent > p2.percent);
-}
-
 double RobotRuler::getMedianScore()
 {
 	double median;
@@ -645,7 +630,7 @@ double RobotRuler::getMedianScore()
 
 void RobotRuler::mate()
 {
-	std::vector<pairer> pairs;
+	std::vector<Pair> pairs;
 	int start;
 	int sum;
 	int numberOfMates = 10;
@@ -654,7 +639,7 @@ void RobotRuler::mate()
 		
 		int j, babies;
 		for (j = 0, babies = 16; j < numberOfMates; ++j) {
-			pairs.push_back(pairer());
+			pairs.push_back(Pair());
 			pairs.back().firstIndex = start;
 			pairs.back().secondIndex = start + j + 1;
 			pairs.back().numberOfBabies = babies;
@@ -694,7 +679,7 @@ void RobotRuler::mate()
 	int babies;
 	//int counter;
 	//int babies;
-	std::vector<pairer>::iterator pairIt;
+	std::vector<Pair>::iterator pairIt;
 
 	for(pairIt = pairs.begin(); pairIt < pairs.end(); ++pairIt)	{
 	//	if(counter < 20)	{

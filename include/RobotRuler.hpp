@@ -2,7 +2,9 @@
 #define ROBOTRULER_HPP_INCLUDED
 
 #include "EnvironementCreator.hpp"
-#include "RobotCreator.hpp"
+#include "Robot.hpp"
+#include "Pair.hpp"
+
 #include <vector>
 #include <algorithm>
 #include <chrono>
@@ -25,17 +27,7 @@
 #define CAN_NOT_COLLECTED	-1
 #define WALL_HIT			-5
 
-class pairer
-{
-public:
-	int firstIndex;
-	int secondIndex;
-	double percent;
-	unsigned int numberOfBabies;
-};
-
 bool compScore(Robot r1, Robot r2);
-bool compPercent(pairer p1, pairer p2);
 
 class RobotRuler: public EnvironementCreator
 {
@@ -44,6 +36,7 @@ public:
 	RobotRuler(int population, int h, int w, std::string algorithmFileLocation, std::string scoreDataName);
 	~RobotRuler();
 
+	// common genetic algorithm functions
 	void performCommand(std::vector<Robot>::iterator robotIterator, int cmd);
 	void performCommand(std::vector<Robot>::iterator robotIterator, int cmd, std::vector<std::vector<int> > env); // parallel processing version
 	void simulateGeneration(int moves, int seasons);
@@ -51,28 +44,33 @@ public:
 	void multiThreadedGenerations(std::vector<std::vector<int> > env, int moves, int seasons, int numOfCores, int coreNum);  // parallel processing version
 	void rankRobots();
 	void mate();
+	void saveAlgorithmList();
+	void printScore();
 
-	const std::vector<int>& getPosition(int robotIndex);
-	const int& getXPosition(int robotIndex);
-	const int& getYPosition(int robotIndex);
-	const std::vector<int>& getAlgorithm(int robotIndex);
-	const int& getScore(int robotIndex);
-	const int& getCansCollected(int robotIndex);
-	//const int& get4Neighborhood(int robotIndex);
-	const std::vector<int>& getPosition(std::vector<Robot>::iterator robotIterator);
-	const int& getXPosition(std::vector<Robot>::iterator robotIterator);
-	const int& getYPosition(std::vector<Robot>::iterator robotIterator);
-	const std::vector<int>& getAlgorithm(std::vector<Robot>::iterator robotIterator);
-	const int& getScore(std::vector<Robot>::iterator robotIterator);
-	const int& getCansCollected(std::vector<Robot>::iterator robotIterator);
-	//const int& get4Neighborhood(std::vector<Robot>::iterator robotIterator);
-	const int& getMoves();
-	const int& getMax();
-	const int& getMin();
-	const int& getAverage();
-	std::string getTimeString();
+	// common genetic algorithm variables
+	std::ofstream scoreOut;
+	std::ofstream algorithmOut;
+
+	// get functions
+	std::vector<int> getPosition(int robotIndex);
+	int getXPosition(int robotIndex);
+	int getYPosition(int robotIndex);
+	std::vector<int> getAlgorithm(int robotIndex);
+	int getScore(int robotIndex);
+	int getCansCollected(int robotIndex);
+	std::vector<int> getPosition(std::vector<Robot>::iterator robotIterator);
+	int getXPosition(std::vector<Robot>::iterator robotIterator);
+	int getYPosition(std::vector<Robot>::iterator robotIterator);
+	std::vector<int> getAlgorithm(std::vector<Robot>::iterator robotIterator);
+	int getScore(std::vector<Robot>::iterator robotIterator);
+	int getCansCollected(std::vector<Robot>::iterator robotIterator);
+	int getMoves();
+	int getMax();
+	int getMin();
+	double getAverage();
 	double getMedianScore();
 
+	// set functions
 	void setPosition(int robotIndex, int x, int y);
 	void setPosition(int robotIndex, std::vector<int> position);
 	void setXPosition(int robotIndex, int x);
@@ -87,16 +85,8 @@ public:
 	void increaseCansCollected(std::vector<Robot>::iterator robotIterator);
 	void setMoves(int moves);
 
-	void saveAlgorithmList();
-	void saveAlgorithm(int robotIndex);
-	void saveAlgorithm(std::vector<Robot>::iterator robotIterator);
-
-	void printScore();
-
-	std::ofstream scoreOut;
-	std::ofstream algorithmOut;
-
 private:
+	// common private variables in genetic algorithms
 	std::vector<Robot> robby__;
 	int moves__;
 	double avg__;
